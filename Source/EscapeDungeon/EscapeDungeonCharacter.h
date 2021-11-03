@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "EscapeDungeonCharacter.generated.h"
 
+
 UCLASS(config=Game)
 class AEscapeDungeonCharacter : public ACharacter
 {
