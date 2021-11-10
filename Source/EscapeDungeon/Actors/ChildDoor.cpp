@@ -11,14 +11,15 @@ AChildDoor::AChildDoor()
 void AChildDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	PuertaHelp = "Aplasta F";
+	PuertaHelp = "Consigue este Objeto";
+	MeshLocation = PuertaMesh->GetRelativeLocation();
 }
 
 //Edito la funcion MoverPuerta del padre
 void AChildDoor::MoverPuerta(float Grados, float DeltaTime)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Hijo -> %s ///// Grados: %f"), *PuertaHelp, Grados);
-	float PosicionZ = FMath::FInterpTo(PuertaMesh->GetRelativeLocation().Z, 100.f, DeltaTime, 10.f * DeltaTime);
+	float PosicionZ = FMath::FInterpTo(PuertaMesh->GetRelativeLocation().Z, MeshLocation.Z + 200.f , DeltaTime, 10.f * DeltaTime);
 	FVector TemLocation = PuertaMesh->GetRelativeLocation();
 	TemLocation.Z = PosicionZ;
 	PuertaMesh->SetRelativeLocation(TemLocation);
