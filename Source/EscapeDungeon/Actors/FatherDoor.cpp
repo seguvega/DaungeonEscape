@@ -31,6 +31,7 @@ AFatherDoor::AFatherDoor()
 	ColisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AFatherDoor::BeginOverlap);
 	ColisionComponent->OnComponentEndOverlap.AddDynamic(this, &AFatherDoor::EndOverlap);
 
+	PuertaHelp = "Poner una ayuda";
 	IsOpen = false;
 }
 
@@ -43,8 +44,7 @@ void AFatherDoor::BeginPlay()
 void AFatherDoor::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("El actor %s me chocó"), *OtherActor->GetName());
-	PuertaHelp = "Pulsa E";
-	SetDoorText("Pulsa E");
+	SetDoorText(PuertaHelp);
 	IsOpen = true;
 }
 
@@ -73,6 +73,11 @@ void AFatherDoor::SetDoorText(FString Texto)
 	MensajeAyuda->SetRelativeLocation(CurrentLocation);
 }
 
+void AFatherDoor::SetDoorMovement(bool bDoor)
+{
+	IsOpen = bDoor;
+}
+
 void AFatherDoor::MoverPuerta(float Grados, float DeltaTime)
 {
 	float GradosLentos = FMath::FInterpTo(PuertaMesh->GetRelativeRotation().Yaw, Grados, DeltaTime, 10.f * DeltaTime); //Tiempo tiene q ser > para q sea mas rapido y alrevez para q sea menor
@@ -87,12 +92,12 @@ void AFatherDoor::Tick(float DeltaTime)
 	if (IsOpen)
 	{
 		if (PuertaMesh->GetRelativeRotation().Yaw <= -88.f) return;
-		UE_LOG(LogTemp, Warning, TEXT("Yaw -> %f"), PuertaMesh->GetRelativeRotation().Yaw);
+		//UE_LOG(LogTemp, Warning, TEXT("Yaw -> %f"), PuertaMesh->GetRelativeRotation().Yaw);
 		MoverPuerta(-90.f, DeltaTime);
 	}
-	else
+	/*else
 	{
 		if (PuertaMesh->GetRelativeRotation().Yaw >= -1.f) return;
 		MoverPuerta(0.f, DeltaTime);
-	}
+	}*/
 }
