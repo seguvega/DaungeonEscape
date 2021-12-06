@@ -1,0 +1,1 @@
+"C:\UEngine\UE_4.27\Engine\Binaries\Win64\UE4Editor.exe" "C:\Users\seguv\Documents\EscapeDungeon\EscapeDungeon.uproject" -game -ResX=960 -ResY=540 -WINDOWED -log

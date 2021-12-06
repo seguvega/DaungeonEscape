@@ -5,7 +5,6 @@
 #include "EscapeDungeon/Actors/FatherDoor.h"
 #include "ChildDoor.generated.h"
 
-
 UCLASS()
 class ESCAPEDUNGEON_API AChildDoor : public AFatherDoor
 {

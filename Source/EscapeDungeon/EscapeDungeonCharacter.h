@@ -6,6 +6,10 @@
 #include "GameFramework/Character.h"
 #include "EscapeDungeonCharacter.generated.h"
 
+class USpringArmComponent;
+class UPhysicsHandleComponent;
+class UPrimitiveComponent;
+class UDungeonGameInstance;
 
 UCLASS(config=Game)
 class AEscapeDungeonCharacter : public ACharacter
@@ -13,12 +17,17 @@ class AEscapeDungeonCharacter : public ACharacter
 	GENERATED_BODY()
 
 	/** Camera boom positioning the camera behind the character */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	class USpringArmComponent* CameraBoom;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* CameraBoom;
 
 	/** Follow camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
+
+	///Agarrar Objetos 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UPhysicsHandleComponent* PhysicsHandle;
+
 public:
 	AEscapeDungeonCharacter();
 
@@ -30,7 +39,19 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Agarre")
+	float ArmLength;
+
+	/** Returns CameraBoom subobject **/
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	/** Returns FollowCamera subobject **/
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
 protected:
+
+	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaTime) override;
 
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
@@ -63,12 +84,40 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
 
+	///Funciones de para los Inputs
+	void MenuPausa();
+
 	void Rodar();
 
-public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-};
+	void AgarrarSoltar();
+	///End Inputs
 
+	///Desplegar el Widget
+	void CrearMenu();
+
+	void DestruirMenu();
+	///End Desplegar el Widget
+
+	///Agarrar Objetos 
+	void Agarrar();
+
+	void Soltar();
+
+	void AgregarFisicas(UPrimitiveComponent* ActorAgarrado, FVector ActorLocation);
+	///End Agarrar Objetos 
+
+private:
+	///Desplegar el Widget
+	bool IsMenuActive;
+
+	UDungeonGameInstance* MyGameInstance;
+	///End Desplegar el Widget
+	
+	///Agarrar Objetos 
+	//Me permite editar las variables Primitivas de un AActor
+	UPrimitiveComponent* ActorPrimitiveComponent;
+
+	bool IsGrab;
+
+	UWorld* Mundo;
+};
