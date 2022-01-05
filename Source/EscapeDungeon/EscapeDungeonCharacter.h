@@ -10,6 +10,7 @@ class USpringArmComponent;
 class UPhysicsHandleComponent;
 class UPrimitiveComponent;
 class UDungeonGameInstance;
+class UAnimMontage;
 
 UCLASS(config=Game)
 class AEscapeDungeonCharacter : public ACharacter
@@ -90,6 +91,8 @@ protected:
 	void Rodar();
 
 	void AgarrarSoltar();
+
+	void Jump();
 	///End Inputs
 
 	///Desplegar el Widget
@@ -104,6 +107,8 @@ protected:
 	void Soltar();
 
 	void AgregarFisicas(UPrimitiveComponent* ActorAgarrado, FVector ActorLocation);
+
+	void DesactivarFisicas();
 	///End Agarrar Objetos 
 
 private:
@@ -120,4 +125,43 @@ private:
 	bool IsGrab;
 
 	UWorld* Mundo;
+	///End Agarrar Objetos
+
+	///Roll
+	int32 NumOfRolls;
+	bool bIsRolling;
+
+	void SetupCharacterToRoll(bool StartRolling);
+	///End Roll
+
+	///Escalar
+	bool bCanClimb;
+
+	bool bTrepar;
+
+	bool bEscalar;
+
+	FVector WallLocation;
+
+	FVector WallNormal;
+
+	FVector WallHeight;
+
+	void SetupCharacterToClimb(bool StartClimbing);
+	///End Escalar
+
+	/// LLave
+	int32 LlavesAgarradas;
+	///End Llave
+
+	///AnimMontages
+	UAnimMontage* RollMontage;
+
+	UAnimMontage* GettingUp;
+
+	UAnimMontage* Climb;
+
+	UFUNCTION()
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	///End AnimMontages
 };

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "EscapeDungeon/Widget/MenuWidget.h"
 #include "EscapeDungeon/Widget/InGameMenuWidget.h"
+#include "EscapeDungeon/Widget/PlayerHud.h"
 
 
 UDungeonGameInstance::UDungeonGameInstance(const FObjectInitializer& ObjectInitializer)
@@ -17,6 +18,10 @@ UDungeonGameInstance::UDungeonGameInstance(const FObjectInitializer& ObjectIniti
 	static ConstructorHelpers::FClassFinder<UUserWidget> WBPInGameMenu(TEXT("/Game/MenuSystem/WPB_InGameMenu"));
 	if (!WBPInGameMenu.Class) return;
 	InGameMenuWidgetClass = WBPInGameMenu.Class;
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> WBPPlayerHUD(TEXT("/Game/MenuSystem/WBP_PlayerHud"));
+	if (!WBPPlayerHUD.Class) return;
+	PlayerHudClass = WBPPlayerHUD.Class;
 }
 
 void UDungeonGameInstance::CreateMainMenu()
@@ -35,22 +40,31 @@ void UDungeonGameInstance::CreateInGameMenu()
 	InGameMenuWidget->SetInterface(this);
 }
 
+void UDungeonGameInstance::CreatePlayerHud()
+{
+	PlayerHud = CreateWidget<UPlayerHud>(this, PlayerHudClass);
+	if(!PlayerHud) return;
+	PlayerHud->AddToViewport();
+	PlayerHud->SetInterface(this);
+}
+
 void UDungeonGameInstance::Play()
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
 	if (!MenuWidget) return;
 	MenuWidget->ChangeInputMode();
-	World->ServerTravel("/Game/Maps/Dungeon?listen");
+	World->ServerTravel("/Game/Maps/Dungeon");
 }
 
 void UDungeonGameInstance::Reiniciar()
 {
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	if (!PlayerController) return;
+	UWorld* World = GetWorld();
+	if (!World) return;
 	if (!InGameMenuWidget) return;
 	InGameMenuWidget->ChangeInputMode();
-	PlayerController->RestartLevel(); // revisar
+	World->ServerTravel("/Game/Maps/Dungeon", false);
+	//PlayerController->RestartLevel(); // revisar 	ClientTravel( TEXT("?restart"), TRAVEL_Relative );
 }
 
 void UDungeonGameInstance::SalirJuego()
@@ -66,10 +80,16 @@ void UDungeonGameInstance::RestartInputMode()
 	InGameMenuWidget->ChangeInputMode();
 }
 
+void UDungeonGameInstance::SendKeys(FString Keys)
+{
+	if (!PlayerHud) return;
+	//UE_LOG(LogTemp, Warning, TEXT("GameInstance Num %s"), *Keys);
+	PlayerHud->SetText(Keys);
+}
+
 void UDungeonGameInstance::Exit()
 {
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!PlayerController) return;
 	PlayerController->ConsoleCommand(FString("Exit"));
 }
-

@@ -24,14 +24,14 @@ AFatherDoor::AFatherDoor()
 
 	MensajeAyuda = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Componente Texto"));
 	if (!MensajeAyuda) return;
-	MensajeAyuda->SetupAttachment(PuertaMesh);
+	MensajeAyuda->SetupAttachment(ColisionComponent);
 	MensajeAyuda->SetTextRenderColor(FColor::White);
 	MensajeAyuda->SetText(FText::FromString(""));
 
 	ColisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AFatherDoor::BeginOverlap);
 	ColisionComponent->OnComponentEndOverlap.AddDynamic(this, &AFatherDoor::EndOverlap);
 
-	PuertaHelp = "Poner una ayuda";
+	PuertaHelp = "Cambiar el Texto En el Child";
 	IsOpen = false;
 }
 
@@ -45,32 +45,18 @@ void AFatherDoor::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 {
 	UE_LOG(LogTemp, Warning, TEXT("El actor %s me chocó"), *OtherActor->GetName());
 	SetDoorText(PuertaHelp);
-	IsOpen = true;
 }
 
 void AFatherDoor::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	UE_LOG(LogTemp, Warning, TEXT("El actor %s salió"), *OtherActor->GetName());
 	SetDoorText(" ");
-	IsOpen = false;
 }
 
 void AFatherDoor::SetDoorText(FString Texto)
 {
-	int32 TextLength = (PuertaHelp.Len() + 1) * 5;
 	FText TransformText = FText::FromString(Texto);
 	MensajeAyuda->SetText(TransformText);
-	FVector CurrentLocation = MensajeAyuda->GetRelativeLocation();
-	if (TransformText.EqualTo(FText::FromString(" ")))
-	{
-		
-		CurrentLocation.Y -= TextLength;
-	}
-	else
-	{
-		CurrentLocation.Y += TextLength;
-	}
-	MensajeAyuda->SetRelativeLocation(CurrentLocation);
 }
 
 void AFatherDoor::SetDoorMovement(bool bDoor)
@@ -95,9 +81,9 @@ void AFatherDoor::Tick(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Yaw -> %f"), PuertaMesh->GetRelativeRotation().Yaw);
 		MoverPuerta(-90.f, DeltaTime);
 	}
-	/*else
+	else
 	{
 		if (PuertaMesh->GetRelativeRotation().Yaw >= -1.f) return;
 		MoverPuerta(0.f, DeltaTime);
-	}*/
+	}
 }

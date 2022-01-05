@@ -9,6 +9,7 @@
 
 class UUserWidget;
 class UMenuWidget;
+class UPlayerHud;
 class UInGameMenuWidget;
 class IMenuInterface;
 
@@ -23,7 +24,11 @@ public:
 
 	void CreateInGameMenu();
 
+	void CreatePlayerHud();
+
 	void RestartInputMode();
+
+	void SendKeys(FString Keys);
 
 protected:
 	UDungeonGameInstance(const FObjectInitializer& ObjectInitializer);
@@ -41,7 +46,11 @@ private:
 
 	TSubclassOf<UUserWidget> InGameMenuWidgetClass;
 
+	TSubclassOf<UUserWidget> PlayerHudClass;
+
 	UMenuWidget* MenuWidget;
 
 	UInGameMenuWidget* InGameMenuWidget;
+
+	UPlayerHud* PlayerHud;
 };
