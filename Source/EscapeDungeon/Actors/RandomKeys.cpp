@@ -8,15 +8,15 @@
 // Sets default values
 ARandomKeys::ARandomKeys()
 {
-	///Para encontrar un BP se utiliza la clase UBlueprint
-	static ConstructorHelpers::FObjectFinder<UBlueprint> ActorKey(TEXT("/Game/MedievalDungeon/Blueprints/BP_Key"));
+	///Para encontrar un BP se utiliza la clase del objecto UBlueprint la cual es -> UClass
+	static ConstructorHelpers::FObjectFinder<UClass> ActorKey(TEXT("Class '/Game/MedievalDungeon/Blueprints/BP_Key.BP_Key_C'"));
 	if (! ActorKey.Object)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Error BP_key"));
 		return;
 	}
-	//Se utiliza una TSubclassOf<UObject> para conseguir el UObject el cual es la clase especifica para el BP_Key
-	Key = ActorKey.Object->GeneratedClass;
+	//Se utiliza una TSoftClassPtr<UClass> para conseguir el UClass  el cual es la clase especifica para el BP_Key
+	Key = ActorKey.Object;
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	IsValidArray = false;
