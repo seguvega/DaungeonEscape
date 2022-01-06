@@ -16,6 +16,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "EscapeDungeon/Actors/ChildDoorWithKeys.h"
 #include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AEscapeDungeonCharacter
@@ -66,7 +67,7 @@ AEscapeDungeonCharacter::AEscapeDungeonCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	//Inicializate 
-	ArmLength = 300.f;
+	ArmLength = 200.f;
 	LlavesAgarradas = 0.f;
 	IsGrab = false;
 	IsMenuActive = false;
@@ -75,6 +76,7 @@ AEscapeDungeonCharacter::AEscapeDungeonCharacter()
 	bCanClimb = false;
 	bTrepar = false;
 	bEscalar = false;
+	IsPlayAnyClimbAnim = false;
 }
 
 void AEscapeDungeonCharacter::BeginPlay()
@@ -155,7 +157,6 @@ void AEscapeDungeonCharacter::Rodar()
 	{
 		NumOfRolls++;
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Numero de Roll´s %i ->"), NumOfRolls);
 }
 
 void AEscapeDungeonCharacter::Jump()
@@ -169,7 +170,7 @@ void AEscapeDungeonCharacter::Jump()
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 	FHitResult HitResult;
-	if (UKismetSystemLibrary::LineTraceSingleForObjects(Mundo, Start, End, Array, true, IgnoreActors, EDrawDebugTrace::ForDuration, HitResult, true))
+	if (UKismetSystemLibrary::LineTraceSingleForObjects(Mundo, Start, End, Array, true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
 	{
 		if (HitResult.IsValidBlockingHit())
 		{
@@ -181,23 +182,31 @@ void AEscapeDungeonCharacter::Jump()
 			FVector WallStart = FVector(TempWallLocation.X, TempWallLocation.Y, TempWallLocation.Z + 200);//Punto muy Arriba en Z
 			FVector WallEnd = FVector(WallStart.X, WallStart.Y, WallStart.Z - 200.f);//Es el punto del ventor TempWallLocation
 			FHitResult HeightHit;
-			if (UKismetSystemLibrary::LineTraceSingleForObjects(Mundo, WallStart, WallEnd, Array, true, IgnoreActors, EDrawDebugTrace::ForDuration, HeightHit, true))
+			if (UKismetSystemLibrary::LineTraceSingleForObjects(Mundo, WallStart, WallEnd, Array, true, IgnoreActors, EDrawDebugTrace::None, HeightHit, true))
 			{
-				if (HeightHit.IsValidBlockingHit() && !bCanClimb)
+				if (HeightHit.IsValidBlockingHit() && !bCanClimb && !IsPlayAnyClimbAnim)
 				{
 					WallHeight = HeightHit.Location;
 					FVector Altura = WallHeight - WallLocation;
+					UE_LOG(LogTemp, Warning, TEXT("Altura del Objeto %s ->"), *Altura.ToString());
 					bCanClimb = true;
 					if (Altura.Z <= 20 && !bTrepar)
 					{
 						bTrepar = true;
+						return;
 					}
 					if (Altura.Z > 20 && !bEscalar)
 					{
+						GetCharacterMovement()->DisableMovement();
 						bEscalar = true;
+						return;
 					}
-					UE_LOG(LogTemp, Warning, TEXT("Altura del Objeto %s ->"), *Altura.ToString());
 				}
+			}
+			else
+			{
+				//Si la segunda linea de verificacion no choca salto
+				ACharacter::Jump();
 			}
 		}
 	}
@@ -348,6 +357,15 @@ void AEscapeDungeonCharacter::Agarrar()
 
 void AEscapeDungeonCharacter::AgregarFisicas(UPrimitiveComponent* ActorAgarrado, FVector ActorLocation)
 {
+	//Comparo Si volvio a Agarrar el mismo Actor q soltó
+	if (ActorsToDisassembleFisics.Num() > 0 && ActorsToDisassembleFisics.Contains(ActorAgarrado))
+	{
+		//No Le agarro si ya esta en el array IsGrab = false
+		IsGrab = false;
+		UE_LOG(LogTemp, Warning, TEXT("Agarraste el mismo wey >:V"));
+		return;
+	
+	}
 	ActorPrimitiveComponent = ActorAgarrado;
 	if (!ActorPrimitiveComponent) return;
 	//Configuro al Actor como Movible
@@ -369,11 +387,14 @@ void AEscapeDungeonCharacter::AgregarFisicas(UPrimitiveComponent* ActorAgarrado,
 
 void AEscapeDungeonCharacter::Soltar()
 {
-	IsGrab = false;
 	//Libero el componente
 	PhysicsHandle->ReleaseComponent();
 
 	if (!ActorPrimitiveComponent) return;
+	//Guardo El PrimitiveComponent
+	ActorsToDisassembleFisics.Add(ActorPrimitiveComponent);
+	IsGrab = false;
+
 	//Activo el Colission Preset para Bloquear las colisiones BlockAll
 	ActorPrimitiveComponent->SetCollisionProfileName(FName("BlockAll"));
 	//Desbloqueo la rotación
@@ -381,23 +402,32 @@ void AEscapeDungeonCharacter::Soltar()
 	ActorPrimitiveComponent->GetBodyInstance()->bLockZRotation = false;
 	ActorPrimitiveComponent->GetBodyInstance()->bLockXRotation = false;
 	ActorPrimitiveComponent->GetBodyInstance()->SetDOFLock(EDOFMode::SixDOF);
-	
+
 	///Delay para desactivar las fisicas
 	///OjO que si coges el mismo objeto enseguida se queda estatico por el timer
 	FTimerHandle TempHandle;
-	Mundo->GetTimerManager().SetTimer(TempHandle, this, &AEscapeDungeonCharacter::DesactivarFisicas, 2.f, false);
+	Mundo->GetTimerManager().SetTimer(TempHandle, this, &AEscapeDungeonCharacter::DesactivarFisicas, 1.6f, false);
 }
 
 void AEscapeDungeonCharacter::DesactivarFisicas()
 {
-	//Desactivo las Fisicas 
-	ActorPrimitiveComponent->SetSimulatePhysics(false);
+	if (ActorsToDisassembleFisics.Num() > 0 )
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Tamaño Antes array -> %i"), ActorsToDisassembleFisics.Num());
+		
+		//Equals --> if (!ActorsToDisassembleFisics[0]) return; aunq el check crashea el juego si el puntero no es valido
+		check(ActorsToDisassembleFisics[0]);
+		//Desactivo las Fisicas 
+		ActorsToDisassembleFisics[0]->SetSimulatePhysics(false);
 
-	//Configuro al Actor como Static
-	ActorPrimitiveComponent->SetMobility(EComponentMobility::Static);
+		//Configuro al Actor como Static
+		ActorsToDisassembleFisics[0]->SetMobility(EComponentMobility::Static);
 
-	//Limpio el puntero ActorPrimitiveComponent
-	ActorPrimitiveComponent = nullptr;
+		//Siempre remuevo el Primer valor q entró
+		ActorsToDisassembleFisics.RemoveAt(0);
+
+		UE_LOG(LogTemp, Warning, TEXT("Tamaño despues array -> %i"), ActorsToDisassembleFisics.Num());
+	}
 }
 
 void AEscapeDungeonCharacter::CrearMenu()
@@ -479,7 +509,7 @@ void AEscapeDungeonCharacter::Tick(float DeltaTime)
 		FVector TempBoneLocation = GetMesh()->GetBoneLocation(FName("Head"));
 		GetController()->GetPlayerViewPoint(TempCameraLocation, TempCameraRotation);
 		//Rotacion de la Camara
-		FVector TempFinalPoint = TempBoneLocation + TempCameraRotation.Vector() * (ArmLength/3);
+		FVector TempFinalPoint = TempBoneLocation + TempCameraRotation.Vector() * (ArmLength);
 
 		//Rotacion del Personaje
 		//FVector TempFinalPoint = TempBoneLocation + GetActorForwardVector() * 2.f;
@@ -497,13 +527,16 @@ void AEscapeDungeonCharacter::Tick(float DeltaTime)
 	if (bCanClimb && !IsPlayingRootMotion())
 	{
 		bCanClimb = false;
+		IsPlayAnyClimbAnim = true;
 		if (bTrepar)
 		{
+			bTrepar = false;
 			SetupCharacterToClimb(true);
 			PlayAnimMontage(GettingUp);
 		}
 		else if (bEscalar)
 		{
+			bEscalar = false;
 			SetupCharacterToClimb(true);
 			PlayAnimMontage(Climb);
 		}
@@ -520,12 +553,15 @@ void AEscapeDungeonCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterr
 	}
 	if (Montage == GettingUp)
 	{
-		bTrepar = false;
+		IsPlayAnyClimbAnim = false;
+		bCanClimb = false;
 		SetupCharacterToClimb(false);
 	}
 	if (Montage == Climb)
 	{
-		bEscalar = false;
+		IsPlayAnyClimbAnim = false;
+		bCanClimb = false;
+		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 		SetupCharacterToClimb(false);
 	}
 }

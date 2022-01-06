@@ -125,6 +125,8 @@ private:
 	bool IsGrab;
 
 	UWorld* Mundo;
+
+	TArray<UPrimitiveComponent*> ActorsToDisassembleFisics;
 	///End Agarrar Objetos
 
 	///Roll
@@ -140,6 +142,8 @@ private:
 	bool bTrepar;
 
 	bool bEscalar;
+
+	bool IsPlayAnyClimbAnim;
 
 	FVector WallLocation;
 
