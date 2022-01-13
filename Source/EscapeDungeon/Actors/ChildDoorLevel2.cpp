@@ -22,7 +22,7 @@ void AChildDoorLevel2::OnBaulBeginOverlap(UPrimitiveComponent* OverlappedCompone
 	if (OtherActor)
 	{
 		NumOfActors++;
-		if (NumOfActors == IntNum)
+		if (NumOfActors >= IntNum)
 		{
 			SetDoorMovement(true);
 		}
@@ -38,7 +38,7 @@ void AChildDoorLevel2::OnBaulEndOverlap(UPrimitiveComponent* OverlappedComponent
 	if (OtherActor)
 	{
 		NumOfActors--;
-		if (NumOfActors != IntNum)
+		if (NumOfActors < IntNum)
 		{
 			SetDoorMovement(false);
 		}

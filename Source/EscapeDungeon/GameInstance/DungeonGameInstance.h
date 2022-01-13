@@ -41,6 +41,8 @@ protected:
 
 	void SalirJuego() override;
 
+	void ExecCommand(FString Command) override;
+
 private:
 	TSubclassOf<UUserWidget> UserWidgetClass;
 

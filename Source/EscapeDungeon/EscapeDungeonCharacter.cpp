@@ -46,7 +46,7 @@ AEscapeDungeonCharacter::AEscapeDungeonCharacter()
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;//Girar con el mouse ejeYaw->Z
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
@@ -58,7 +58,7 @@ AEscapeDungeonCharacter::AEscapeDungeonCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 300.0f; // The camera follows at this distance behind the character	
+	CameraBoom->TargetArmLength = 200.f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -129,6 +129,7 @@ void AEscapeDungeonCharacter::SetupPlayerInputComponent(class UInputComponent* P
 
 void AEscapeDungeonCharacter::AgarrarSoltar()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Valor del Grap %i ->"), IsGrab);
 	if (!IsGrab)
 	{
 		Agarrar();
@@ -188,7 +189,7 @@ void AEscapeDungeonCharacter::Jump()
 				{
 					WallHeight = HeightHit.Location;
 					FVector Altura = WallHeight - WallLocation;
-					UE_LOG(LogTemp, Warning, TEXT("Altura del Objeto %s ->"), *Altura.ToString());
+					//UE_LOG(LogTemp, Warning, TEXT("Altura del Objeto %s ->"), *Altura.ToString());
 					bCanClimb = true;
 					if (Altura.Z <= 20 && !bTrepar)
 					{
@@ -284,17 +285,18 @@ void AEscapeDungeonCharacter::Agarrar()
 	FHitResult HitResult;
 	FVector CameraLocation;
 	FRotator CameraRotation;
+	//Para que el personaje apunte con el moviminto del mouse(Camera) Activar bUseControllerRotationYaw = true;
 	GetController()->GetPlayerViewPoint(CameraLocation, CameraRotation);
 	//Bone Location
-	FVector BoneLocation = GetMesh()->GetBoneLocation(FName("Head"));
-	///TODO Validar BoneLocation
+	FVector BoneLocation = GetMesh()->GetBoneLocation(FName("Head"));//Validara
 	FVector StartPoint = BoneLocation + CameraRotation.Vector();
 	FVector EndPoint = BoneLocation + CameraRotation.Vector() * ArmLength;//Vector() == Dirección
+	
 	// Dibujar una linea Debug -> DrawDebugLine(Mundo, StartPoint, EndPoint, FColor::Red, false, 5.f, 2.f);
 	ETraceTypeQuery MyQuery = UEngineTypes::ConvertToTraceType(ECC_Visibility);//Ojito
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
-	if (UKismetSystemLibrary::SphereTraceSingle(Mundo, StartPoint, EndPoint, 25.f, MyQuery, false, ActorsToIgnore, EDrawDebugTrace::Type::ForDuration, HitResult, true))
+	if (UKismetSystemLibrary::SphereTraceSingle(Mundo, StartPoint, EndPoint, 18.f, MyQuery, false, ActorsToIgnore, EDrawDebugTrace::Type::None, HitResult, true))
 	{
 		if (HitResult.IsValidBlockingHit())
 		{
@@ -344,8 +346,13 @@ void AEscapeDungeonCharacter::Agarrar()
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Actor no Valido (Q raro)"));
+				IsGrab = false;
 			}
+			
+		}
+		else
+		{
+			IsGrab = false;
 		}
 	}
 	else

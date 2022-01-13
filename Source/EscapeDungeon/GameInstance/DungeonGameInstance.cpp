@@ -87,6 +87,15 @@ void UDungeonGameInstance::SendKeys(FString Keys)
 	PlayerHud->SetText(Keys);
 }
 
+void UDungeonGameInstance::ExecCommand(FString Command)
+{
+	if (!MenuWidget) return;
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!PlayerController) return;
+	UE_LOG(LogTemp, Warning, TEXT("GameInstance Recive-> %s"), *Command);
+	PlayerController->ConsoleCommand(Command);
+}
+
 void UDungeonGameInstance::Exit()
 {
 	APlayerController* PlayerController = GetFirstLocalPlayerController();

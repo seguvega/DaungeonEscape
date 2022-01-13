@@ -27,4 +27,6 @@ public:
 	virtual void Reiniciar() = 0;
 
 	virtual void SalirJuego() = 0;
+
+	virtual void ExecCommand(FString Command) = 0;
 };
