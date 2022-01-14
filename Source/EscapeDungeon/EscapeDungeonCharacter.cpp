@@ -67,7 +67,7 @@ AEscapeDungeonCharacter::AEscapeDungeonCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	//Inicializate 
-	ArmLength = 200.f;
+	ArmLength = 360.f;
 	LlavesAgarradas = 0.f;
 	IsGrab = false;
 	IsMenuActive = false;
@@ -134,7 +134,7 @@ void AEscapeDungeonCharacter::AgarrarSoltar()
 	{
 		Agarrar();
 	}
-	else
+	else if (IsGrab)
 	{
 		Soltar();
 	}
@@ -179,7 +179,7 @@ void AEscapeDungeonCharacter::Jump()
 			WallNormal = HitResult.Normal;
 			///Para Localizar la altura del Objeto
 			// GetForwardVector Retorna el vector en X o Y Pero este esta aputando al jugador!!!
-			FVector TempWallLocation = WallLocation + UKismetMathLibrary::GetForwardVector(WallNormal.Rotation()) * -10.F;//location + Direccion * Magnitud y sentido
+			FVector TempWallLocation = WallLocation + UKismetMathLibrary::GetForwardVector(WallNormal.Rotation()) * -42.f;//location + Direccion * Magnitud y sentido
 			FVector WallStart = FVector(TempWallLocation.X, TempWallLocation.Y, TempWallLocation.Z + 200);//Punto muy Arriba en Z
 			FVector WallEnd = FVector(WallStart.X, WallStart.Y, WallStart.Z - 200.f);//Es el punto del ventor TempWallLocation
 			FHitResult HeightHit;
@@ -279,9 +279,14 @@ void AEscapeDungeonCharacter::MoveRight(float Value)
 	}
 }
 
+void AEscapeDungeonCharacter::SetGrab(bool Grab)
+{
+	IsGrab = Grab;
+	MyGameInstance->SendIsGrabbing(Grab);
+}
+
 void AEscapeDungeonCharacter::Agarrar()
 {
-	IsGrab = true;
 	FHitResult HitResult;
 	FVector CameraLocation;
 	FRotator CameraRotation;
@@ -290,13 +295,12 @@ void AEscapeDungeonCharacter::Agarrar()
 	//Bone Location
 	FVector BoneLocation = GetMesh()->GetBoneLocation(FName("Head"));//Validara
 	FVector StartPoint = BoneLocation + CameraRotation.Vector();
-	FVector EndPoint = BoneLocation + CameraRotation.Vector() * ArmLength;//Vector() == Dirección
-	
+	FVector EndPoint = CameraLocation + CameraRotation.Vector() * ArmLength;//Vector() == Dirección
 	// Dibujar una linea Debug -> DrawDebugLine(Mundo, StartPoint, EndPoint, FColor::Red, false, 5.f, 2.f);
 	ETraceTypeQuery MyQuery = UEngineTypes::ConvertToTraceType(ECC_Visibility);//Ojito
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
-	if (UKismetSystemLibrary::SphereTraceSingle(Mundo, StartPoint, EndPoint, 18.f, MyQuery, false, ActorsToIgnore, EDrawDebugTrace::Type::None, HitResult, true))
+	if (UKismetSystemLibrary::SphereTraceSingle(Mundo, StartPoint, EndPoint, 8.f, MyQuery, false, ActorsToIgnore, EDrawDebugTrace::Type::None, HitResult, true))
 	{
 		if (HitResult.IsValidBlockingHit())
 		{
@@ -305,6 +309,7 @@ void AEscapeDungeonCharacter::Agarrar()
 				TArray<FName> ActorTags = HitResult.Actor->Tags;
 				if (ActorTags.Num() > 0)
 				{
+					SetGrab(true);
 					for (auto Tag : ActorTags)
 					{
 						if (Tag.IsEqual(FName("agarrable")))
@@ -313,7 +318,7 @@ void AEscapeDungeonCharacter::Agarrar()
 						}
 						else if (Tag.IsEqual(FName("Llave")))
 						{
-							IsGrab = false;
+							SetGrab(false);
 							if (LlavesAgarradas < 3)//Block in 3
 							{
 								LlavesAgarradas++;
@@ -341,24 +346,24 @@ void AEscapeDungeonCharacter::Agarrar()
 				else
 				{
 					//Si el Actor no tiene ningun tag
-					IsGrab = false;
+					SetGrab(false);
 				}
 			}
 			else
 			{
-				IsGrab = false;
+				SetGrab(false);
 			}
 			
 		}
 		else
 		{
-			IsGrab = false;
+			SetGrab(false);
 		}
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Hay colision")); //No hagarro nada
-		IsGrab = false;
+		SetGrab(false);
 	}
 }
 
@@ -368,7 +373,7 @@ void AEscapeDungeonCharacter::AgregarFisicas(UPrimitiveComponent* ActorAgarrado,
 	if (ActorsToDisassembleFisics.Num() > 0 && ActorsToDisassembleFisics.Contains(ActorAgarrado))
 	{
 		//No Le agarro si ya esta en el array IsGrab = false
-		IsGrab = false;
+		SetGrab(false);
 		UE_LOG(LogTemp, Warning, TEXT("Agarraste el mismo wey >:V"));
 		return;
 	
@@ -400,7 +405,7 @@ void AEscapeDungeonCharacter::Soltar()
 	if (!ActorPrimitiveComponent) return;
 	//Guardo El PrimitiveComponent
 	ActorsToDisassembleFisics.Add(ActorPrimitiveComponent);
-	IsGrab = false;
+	SetGrab(false);
 
 	//Activo el Colission Preset para Bloquear las colisiones BlockAll
 	ActorPrimitiveComponent->SetCollisionProfileName(FName("BlockAll"));
@@ -513,10 +518,10 @@ void AEscapeDungeonCharacter::Tick(float DeltaTime)
 	{
 		FVector TempCameraLocation;
 		FRotator TempCameraRotation;
-		FVector TempBoneLocation = GetMesh()->GetBoneLocation(FName("Head"));
+		//Ubicación de la camara
 		GetController()->GetPlayerViewPoint(TempCameraLocation, TempCameraRotation);
 		//Rotacion de la Camara
-		FVector TempFinalPoint = TempBoneLocation + TempCameraRotation.Vector() * (ArmLength);
+		FVector TempFinalPoint = TempCameraLocation + TempCameraRotation.Vector() * (ArmLength-40);
 
 		//Rotacion del Personaje
 		//FVector TempFinalPoint = TempBoneLocation + GetActorForwardVector() * 2.f;

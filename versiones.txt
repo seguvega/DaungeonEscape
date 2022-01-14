@@ -1,0 +1,9 @@
+v1.0 -> Bug AgarrarObejtos
+V1.1 -> Bug Salto 1/2 y AgarrarObejtos
+v1.2 -> Bug Salto Corregido y AgarrarObjetos 1/2 de correción ---- Actual
+V1.3 -> Actualizado  Rotacion con la camara en el eje Z
+v1.4 -> Correccion del bool IsGrap y Creacion del menu Opciones primera face
+v1.5 -> Menu Opciones Completo y funcional --- pruebas 
+v1.6 -> Menu de opciones 100% corregido
+v1.7 -> Agregacion de un Crosshair, reducir distacia de agarrar objetos 
+v1.8 -> Agregacion de una mano para guiar al usuario en el hud(Mejoro El bool Agarrar y su Función), correccion de color de las antorchas, hogeras, velas, Configuracion final del juego

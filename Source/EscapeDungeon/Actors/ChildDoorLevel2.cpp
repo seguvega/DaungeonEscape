@@ -47,9 +47,8 @@ void AChildDoorLevel2::OnBaulEndOverlap(UPrimitiveComponent* OverlappedComponent
 
 void AChildDoorLevel2::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 	int32 TempRes = IntNum - NumOfActors;
-	if (TempRes == 0)
+	if (TempRes <= 0)
 	{
 		PuertaHelp = "Buenaa :)";
 	}
@@ -57,12 +56,14 @@ void AChildDoorLevel2::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		PuertaHelp = "Te Faltan "+ FString::FromInt(TempRes)+ " Objectos";
 	}
+	//Primero Cambio PuertaHelp y luego llamo al Padre
+	Super::BeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
 }
 
 void AChildDoorLevel2::BeginPlay()
 {
 	Super::BeginPlay();
-	float Num = FMath::FRandRange(1.f, 10.f);
+	float Num = FMath::FRandRange(4.f, 13.f);
 	IntNum = FMath::FloorToInt(Num);
 	PuertaHelp = "Ingresa " + FString::FromInt(IntNum) + " Objectos";
 	UE_LOG(LogTemp, Warning, TEXT("Mi rand -> %i"), IntNum);

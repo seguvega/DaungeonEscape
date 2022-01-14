@@ -30,18 +30,23 @@ public:
 
 	void SendKeys(FString Keys);
 
+	void SendIsGrabbing(bool IsGrab);
+
+	void EndGame();
+
 protected:
 	UDungeonGameInstance(const FObjectInitializer& ObjectInitializer);
+	///PURE Functions
+	virtual void Play();
 
-	void Play() override;
+	virtual void Exit();
 
-	void Exit() override;
+	virtual void Reiniciar();
 
-	void Reiniciar() override;
+	virtual void SalirJuego();
 
-	void SalirJuego() override;
-
-	void ExecCommand(FString Command) override;
+	virtual void ExecCommand(FString Command);
+	///End PURE Functions
 
 private:
 	TSubclassOf<UUserWidget> UserWidgetClass;

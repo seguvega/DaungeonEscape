@@ -67,6 +67,11 @@ void UDungeonGameInstance::Reiniciar()
 	//PlayerController->RestartLevel(); // revisar 	ClientTravel( TEXT("?restart"), TRAVEL_Relative );
 }
 
+void UDungeonGameInstance::EndGame()
+{
+	SalirJuego();
+}
+
 void UDungeonGameInstance::SalirJuego()
 {
 	UWorld* ThisWorld = GetWorld();
@@ -85,6 +90,12 @@ void UDungeonGameInstance::SendKeys(FString Keys)
 	if (!PlayerHud) return;
 	//UE_LOG(LogTemp, Warning, TEXT("GameInstance Num %s"), *Keys);
 	PlayerHud->SetText(Keys);
+}
+
+void UDungeonGameInstance::SendIsGrabbing(bool IsGrab)
+{
+	if (!PlayerHud) return;
+	PlayerHud->SetVisibleImage(IsGrab);
 }
 
 void UDungeonGameInstance::ExecCommand(FString Command)

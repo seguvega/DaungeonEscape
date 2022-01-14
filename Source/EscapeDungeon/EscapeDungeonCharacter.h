@@ -109,6 +109,8 @@ protected:
 	void AgregarFisicas(UPrimitiveComponent* ActorAgarrado, FVector ActorLocation);
 
 	void DesactivarFisicas();
+
+	void SetGrab(bool Grab);
 	///End Agarrar Objetos 
 
 private:

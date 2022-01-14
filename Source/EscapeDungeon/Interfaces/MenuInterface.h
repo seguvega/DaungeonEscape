@@ -13,7 +13,6 @@ class UMenuInterface : public UInterface
 	GENERATED_BODY()
 };
 
-
 class ESCAPEDUNGEON_API IMenuInterface
 {
 	GENERATED_BODY()
