@@ -296,7 +296,6 @@ void AEscapeDungeonCharacter::Agarrar()
 	FVector BoneLocation = GetMesh()->GetBoneLocation(FName("Head"));//Validara
 	FVector StartPoint = BoneLocation + CameraRotation.Vector();
 	FVector EndPoint = CameraLocation + CameraRotation.Vector() * ArmLength;//Vector() == Dirección
-	// Dibujar una linea Debug -> DrawDebugLine(Mundo, StartPoint, EndPoint, FColor::Red, false, 5.f, 2.f);
 	ETraceTypeQuery MyQuery = UEngineTypes::ConvertToTraceType(ECC_Visibility);//Ojito
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
@@ -532,7 +531,6 @@ void AEscapeDungeonCharacter::Tick(float DeltaTime)
 	{
 		bIsRolling = true;
 		SetupCharacterToRoll(true);
-		UE_LOG(LogTemp, Warning, TEXT("Character Speed -> %f"), GetCharacterMovement()->GetMaxSpeed());
 		PlayAnimMontage(RollMontage);
 	}
 
@@ -553,6 +551,10 @@ void AEscapeDungeonCharacter::Tick(float DeltaTime)
 			PlayAnimMontage(Climb);
 		}
 	}
+
+	int TempIntFps = FMath::TruncToInt(1/DeltaTime);
+	FString TempFps = FString::FromInt(TempIntFps);
+	MyGameInstance->SendPlayerFps(TempFps);
 }
 
 void AEscapeDungeonCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)

@@ -20,9 +20,6 @@ public:
 
 	ARandomKeys();
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 protected:
 	bool IsValidArray;
 

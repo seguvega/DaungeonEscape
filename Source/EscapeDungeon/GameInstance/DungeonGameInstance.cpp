@@ -98,6 +98,12 @@ void UDungeonGameInstance::SendIsGrabbing(bool IsGrab)
 	PlayerHud->SetVisibleImage(IsGrab);
 }
 
+void UDungeonGameInstance::SendPlayerFps(FString StringFps)
+{
+	if (!PlayerHud) return;
+	PlayerHud->SetFps(StringFps);
+}
+
 void UDungeonGameInstance::ExecCommand(FString Command)
 {
 	if (!MenuWidget) return;

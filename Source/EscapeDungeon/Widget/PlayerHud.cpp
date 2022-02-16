@@ -16,6 +16,11 @@ void UPlayerHud::SetText(FString Keys)
 	TB_Llaves->SetText(FText::FromString(Keys));
 }
 
+void UPlayerHud::SetFps(FString FpsString)
+{
+	TB_Fps->SetText(FText::FromString(FpsString));
+}
+
 void UPlayerHud::SetVisibleImage(bool IsGrabbing)
 {
 	if (IsGrabbing)

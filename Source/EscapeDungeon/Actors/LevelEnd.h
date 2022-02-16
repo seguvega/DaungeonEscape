@@ -9,6 +9,7 @@
 class USceneComponent;
 class UBoxComponent;
 class UTextRenderComponent;
+class AEscapeDungeonCharacter;
 
 UCLASS()
 class ESCAPEDUNGEON_API ALevelEnd : public AActor
@@ -17,6 +18,9 @@ class ESCAPEDUNGEON_API ALevelEnd : public AActor
 	
 public:	
 	ALevelEnd();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	float MaxWaitTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
 	USceneComponent* SceneComponent;
@@ -35,4 +39,15 @@ protected:
 
 	UFUNCTION()
 	void OnComponentOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+private:
+	bool IsOverlap;
+
+	float TimeinSeconds;
+
+	TArray<FString> Creditos;
+
+	AEscapeDungeonCharacter* Character;
+
+	void RenderCreditos();
 };

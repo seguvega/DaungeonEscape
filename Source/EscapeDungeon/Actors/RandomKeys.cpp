@@ -18,7 +18,7 @@ ARandomKeys::ARandomKeys()
 	//Se utiliza una TSoftClassPtr<UClass> para conseguir el UClass  el cual es la clase especifica para el BP_Key
 	Key = ActorKey.Object;
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	IsValidArray = false;
 	NumOfKeys = 3;
 }
@@ -63,11 +63,4 @@ void ARandomKeys::RandomizeKeys()
 		UE_LOG(LogTemp, Warning, TEXT("World Position  -> %s"), *WorldPos.ToString());
 	}
 	
-}
-
-// Called every frame
-void ARandomKeys::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }

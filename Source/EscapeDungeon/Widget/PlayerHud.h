@@ -18,6 +18,9 @@ public:
 	UTextBlock* TB_Llaves;
 
 	UPROPERTY(meta = (BindWidget))
+	UTextBlock* TB_Fps;
+
+	UPROPERTY(meta = (BindWidget))
 	UImage* NotGrab;
 
 	UPROPERTY(meta = (BindWidget))
@@ -27,7 +30,9 @@ public:
 
 	void SetVisibleImage(bool IsGrabbing);
 
+	void SetFps(FString FpsString);
+
 protected:
 	virtual bool Initialize() override;
-	
+
 };

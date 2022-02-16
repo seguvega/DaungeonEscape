@@ -32,6 +32,8 @@ public:
 
 	void SendIsGrabbing(bool IsGrab);
 
+	void SendPlayerFps(FString StringFps);
+
 	void EndGame();
 
 protected:
